@@ -1,10 +1,3 @@
-/* File: BlackWhite.c
-* Student Name: Michelle Chung Chai Ying
-* Student ID: 4316916
-* Group: 01
-* Date started: 21/04/2014
-* Last Modified: 21/04/2014
-*/
 
 #include <stdio.h>
 #include <string.h>
@@ -246,7 +239,7 @@ void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 		}
 	}
 	
-/*Flips tokens (Diagonal): UP + LEFT (NOT WORKING)*/
+/*Flips tokens (Diagonal): UP + LEFT (Got Problem)*/
 	 flip =0;
 	 tcount = 0;
 	 
