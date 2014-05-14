@@ -1,3 +1,8 @@
+/* File: BlackWhite.c
+* Date started: 21/04/2014
+* Last Modified: 15/05/2014
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <conio.h>
@@ -14,7 +19,7 @@ void initialize(int board[ROW][COLUMN])
 	{
 		for (y =0; y < COLUMN; y++)
 		{
-			board[x][y] = ' ';
+			board[x][y] = '@';
 		}
 	}
 	board[3][3] = '@';
@@ -42,7 +47,7 @@ void display(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], cha
 }
 
 /*Shows where the player is currently selecting*/
-void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10])
+void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10], char token)
 {
 	int x, y;
 	printf("\nCurrent score:");
@@ -57,7 +62,7 @@ void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char s
 		printf("|\n");
 	}	
 	
-	printf("\nCurrent player: %s\n", cplyr);
+	printf("\nCurrent player: %s (%c)\n", cplyr, token);
 	printf("Press a directional key to navigate around the board.\n");
 	printf("Press Enter to place a token.\n");
 	printf("Press ESC to exit.\n");
@@ -83,11 +88,10 @@ int restoretoken(int board[ROW][COLUMN], int a, int b)
 }
 
 /*Flips tokens: UP */
-void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
+void ftup(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 {
-	int x, y, flip=0, flip2=0, up=a-1, down=a+1, left=b-1, right=b+1, f, f2, tcount=0, t2count=0, counter=0;
+	int x, flip=0, up=a-1, f, tcount=0, counter=0;
 	
-	flip =0;
 		
 	for (x=up; x>0; x--)
 	{
@@ -124,11 +128,16 @@ void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 			counter++;
 		}
 	}
+	
+	*flipup = counter;
+}
 
 /*Flips tokens: DOWN*/
-	flip =0;
+void ftdown(int board[ROW][COLUMN], char token, int a, int b, int *flipdown)
+{
+	int x, flip=0,down=a+1, f, tcount=0, counter=0;
 		
-	for (x=down; x<=7; x++)
+	for (x=down; x<8; x++)
 	{
 		if(board[x][b] == token)
 		{
@@ -162,10 +171,15 @@ void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 			counter++;
 		}
 	}
+	*flipdown = counter;
+}
+
 /*Flips tokens: LEFT*/
-	flip =0;
+void ftleft(int board[ROW][COLUMN], char token, int a, int b, int *flipleft)
+{
+	int y, flip=0, left=b-1, f, tcount=0, counter=0;
 	
-	for (y=left; y>0; y--)
+	for (y=left; y>=0; y--)
 	{
 		if(board[a][y] == token)
 		{
@@ -199,11 +213,15 @@ void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 			counter++;
 		}
 	}
+	*flipleft = counter;
+}
 
 /*Flips tokens: RIGHT*/
-	flip =0;
+void ftright(int board[ROW][COLUMN], char token, int a, int b, int *flipright)
+{
+	int y, flip=0, right=b+1, f, tcount=0, counter=0;
 	
-	for (y=right; y<=7; y++)
+	for (y=right; y<8; y++)
 	{
 		if(board[a][y] == token)
 		{
@@ -237,311 +255,292 @@ void fliptoken(int board[ROW][COLUMN], char token, int a, int b, int *flipup)
 			counter++;
 		}
 	}
+	*flipright = counter;
+}
+/*Flips tokens (Diagonal): UP + LEFT*/
+void ftul(int board[ROW][COLUMN], char token, int a, int b, int *flipul)
+{
+	int x, y, flip=0, up=a-1, f, tcount=0, counter=0;
 	
-/*Flips tokens (Diagonal): UP + LEFT (Got Problem)*/
-	 flip =0;
-	 tcount = 0;
-	 
 	 x=a;
 	 y=b;
 	 
 	 do{	
-	 	if(x>0 && y>0)
+	 	
+		do{
+			x--;
+			y--;
+			if(board[x][y] == token)
+		 	{
+				tcount = x;
+				break;
+			}
+			else if(board[x][y] == ' ')
+			{
+				break;
+			}
+		}while(board[x][y] != token && x>0 && y>0);
+		
+		x=a;
+		y=b;
+		
+		do
 		{
-			do{
+			if(tcount>0)
+			{
 				x--;
 				y--;
-				if(board[x][y] == token)
-			 	{
-					tcount = x;
-					break;
-				}
-				else if(board[x][y] == ' ')
+				if(board[x][y] != token && board[x][y] != ' ')
 				{
-					break;
-				}
-			}while(board[x][y] != token);
-			
-			x=a;
-			y=b;
-			
-			do
-			{
-				if(tcount>0)
-				{
-					x--;
-					y--;
-					if(board[x][y] != token && board[x][y] != ' ')
-					{
-						flip = flip +1;
-					}
-					else
-					{
-						break;
-					}
+					flip = flip +1;
 				}
 				else
 				{
 					break;
 				}
-			}while(x != tcount);
-			 
-			x=a;
-			y=b;
-			 
-			if (flip>=0)
-			{
-				f=up-flip;
-				
-				for (x=up; x>f; x--)
-				{
-					y--;
-					board[x][y] = token;
-					counter++;
-				}
-				break;
 			}
 			else
 			{
 				break;
 			}
-		 }
-		 else
-		 {
-		 	break;
-		 }
-	 }while(board[x][y] != ' ');
+		}while(x != tcount && x>0 && y>0);
+		 
+		x=a;
+		y=b;
+		 
+		if (flip>=0)
+		{
+			f=up-flip;
+			
+			for (x=up; x>f; x--)
+			{
+				y--;
+				board[x][y] = token;
+				counter++;
+			}
+			break;
+		}
+		else
+		{
+			break;
+		}
+	 }while(board[x][y] != ' ' && x>0 && y>0);
+
+	 *flipul = counter;
+}
 
 /*Flips tokens (Diagonal): UP + RIGHT*/
-	 flip =0;
-	 tcount = 0;
-	 
-	 x=a;
-	 y=b;
-	 
+void ftur(int board[ROW][COLUMN], char token, int a, int b, int *flipur)
+{
+	int x=a, y=b, flip=0, up=a-1, f, tcount=0, counter=0;
+		 
 	 do{	
-	 	if(x>0 && y<7)
+	 	 do{
+			x--;
+			y++;
+			if(board[x][y] == token)
+		 	{
+				tcount = x;
+				break;
+			}
+			else if(board[x][y] == ' ')
+			{
+				break;
+			}
+		}while(board[x][y] != token && x>0 && y<8);
+			
+		x=a;
+		y=b;
+		
+		do
 		{
-			do{
+			if(tcount>0)
+			{
 				x--;
 				y++;
-				if(board[x][y] == token)
-			 	{
-					tcount = x;
-					break;
-				}
-				else if(board[x][y] == ' ')
+				if(board[x][y] != token && board[x][y] != ' ')
 				{
-					break;
-				}
-			}while(board[x][y] != token);
-			
-			x=a;
-			y=b;
-			
-			do
-			{
-				if(tcount>0)
-				{
-					x--;
-					y++;
-					if(board[x][y] != token && board[x][y] != ' ')
-					{
-						flip = flip +1;
-					}
-					else
-					{
-						break;
-					}
+					flip = flip +1;
 				}
 				else
 				{
 					break;
 				}
-			}while(x != tcount);
-			 
-			x=a;
-			y=b;
-			 
-			if (flip>=0)
-			{
-				f=up-flip;
-				
-				for (x=up; x>f; x--)
-				{
-					y++;
-					board[x][y] = token;
-					counter++;
-				}
-				break;
 			}
 			else
 			{
 				break;
 			}
-	 	}
+		}while(x != tcount && x>0 && y<8);
+		 
+		x=a;
+		y=b;
+			 
+		if (flip>=0)
+		{
+			f=up-flip;
+			
+			for (x=up; x>f; x--)
+			{
+				y++;
+				board[x][y] = token;
+				counter++;
+			}
+			break;
+		}
 		else
 		{
 			break;
 		}
-	 }while(board[x][y] != ' ');
+	
+	 }while(board[x][y] != ' ' && x>0 && y<8);
+	 
+	 *flipur = counter;
+}
 
 /*Flips tokens (Diagonal): DOWN + LEFT*/
-	 flip =0;
-	 tcount = 0;
-	 
-	 x=a;
-	 y=b;
-	 
+void ftdl(int board[ROW][COLUMN], char token, int a, int b, int *flipdl)
+{
+	int x=a, y=b, down=a+1, flip=0, f, tcount=0, counter=0;
+ 
 	 do{	
-	 	if(x<7 && y>0)
+	 	 do{
+			x++;
+			y--;
+			if(board[x][y] == token)
+		 	{
+				tcount = x;
+				break;
+			}
+			else if(board[x][y] == ' ')
+			{
+				break;
+			}
+		}while(board[x][y] != token && x<8 && y>0);
+			
+		x=a;
+		y=b;
+		
+		do
 		{
-			do{
+			if(tcount>0)
+			{
 				x++;
 				y--;
-				if(board[x][y] == token)
-			 	{
-					tcount = x;
-					break;
-				}
-				else if(board[x][y] == ' ')
+				if(board[x][y] != token && board[x][y] != ' ')
 				{
-					break;
-				}
-			}while(board[x][y] != token);
-			
-			x=a;
-			y=b;
-			
-			do
-			{
-				if(tcount>0)
-				{
-					x++;
-					y--;
-					if(board[x][y] != token && board[x][y] != ' ')
-					{
-						flip = flip +1;
-					}
-					else
-					{
-						break;
-					}
+					flip = flip +1;
 				}
 				else
 				{
 					break;
 				}
-			}while(x != tcount);
-			 
-			x=a;
-			y=b;
-			 
-			if (flip>=0)
-			{
-				f=down+flip;
-				
-				for (x=down; x<f; x++)
-				{
-					y--;
-					board[x][y] = token;
-					counter++;
-				}
-				break;
 			}
 			else
 			{
 				break;
 			}
-	 	}
+		}while(x != tcount && x<8 && y>0);
+			 
+		x=a;
+		y=b;
+		 
+		if (flip>=0)
+		{
+			f=down+flip;
+			
+			for (x=down; x<f; x++)
+			{
+				y--;
+				board[x][y] = token;
+				counter++;
+			}
+			break;
+		}
 		else
 		{
 			break;
 		}
-	 }while(board[x][y] != ' ');
+	 }while(board[x][y] != ' ' && x<8 && y>0);
+
+	*flipdl = counter;
+}
 
 /*Flips tokens (Diagonal): DOWN + RIGHT*/
-	 flip =0;
-	 tcount = 0;
-	 
-	 x=a;
-	 y=b;
+void ftdr(int board[ROW][COLUMN], char token, int a, int b, int *flipdr)
+{
+	int x=a, y=b, flip=0, down=a+1, f, tcount=0, counter=0;
 	 
 	 do{	
-	 	if(x<7 && y <7)
+	 
+		do{
+			x++;
+			y++;
+			if(board[x][y] == token)
+		 	{
+				tcount = x;
+				break;
+			}
+			else if(board[x][y] == ' ')
+			{
+				break;
+			}
+		}while(board[x][y] != token && x<8 && y<8);
+			
+		x=a;
+		y=b;
+		
+		do
 		{
-			do{
+			if(tcount>0)
+			{
 				x++;
 				y++;
-				if(board[x][y] == token)
-			 	{
-					tcount = x;
-					break;
-				}
-				else if(board[x][y] == ' ')
+				if(board[x][y] != token && board[x][y] != ' ')
 				{
-					break;
-				}
-			}while(board[x][y] != token);
-			
-			x=a;
-			y=b;
-			
-			do
-			{
-				if(tcount>0)
-				{
-					x++;
-					y++;
-					if(board[x][y] != token && board[x][y] != ' ')
-					{
-						flip = flip +1;
-					}
-					else
-					{
-						break;
-					}
+					flip = flip +1;
 				}
 				else
 				{
 					break;
 				}
-			}while(x != tcount);
-			 
-			x=a;
-			y=b;
-			 
-			if (flip>=0)
-			{
-				f=down+flip;
-				
-				for (x=down; x<f; x++)
-				{
-					y++;
-					board[x][y] = token;
-					counter++;
-				}
-				break;
 			}
 			else
 			{
 				break;
 			}
+		}while(x != tcount && x<8 && y<8);
+			 
+		x=a;
+		y=b;
+		 
+		if (flip>=0)
+		{
+			f=down+flip;
+				
+			for (x=down; x<f; x++)
+			{
+				y++;
+				board[x][y] = token;
+				counter++;
+			}
+			break;
 		}
 		else
 		{
 			break;
-		} 
-	 }while(board[x][y] != ' ');
+		}
+	}while(board[x][y] != ' ' && x<8 && y<8);
 
 
-	*flipup = counter;
+	*flipdr = counter;
 }
 
 /*Calculates the changes in black and white tokens*/
 void calctoken(int board[ROW][COLUMN], int *bcount, int *wcount, int *total)
 {
 	int b=0, w=0, x, y;
+	
 	
 	for (x = 0; x < ROW; x++)
 	{
@@ -557,9 +556,10 @@ void calctoken(int board[ROW][COLUMN], int *bcount, int *wcount, int *total)
 			}	 
 		}
 	}
+
 	*bcount = b;
 	*wcount = w;
-	*total = b + w;
+	*total = *bcount + *wcount;
 }
 
 
@@ -567,14 +567,14 @@ void calctoken(int board[ROW][COLUMN], int *bcount, int *wcount, int *total)
 
 void navigation(int board[ROW][COLUMN], int ch1, int ch2, char token,int bcount, int wcount, int total, char fplyr[10], char splyr[10], char cplyr[10])
 {
-	int a=7, b=7, tr, flipup, yn;
+	int a=7, b=7, tr, flipup, flipdown, flipleft, flipright, flipul, flipur, flipdl, flipdr, yn;
 	ch1 = 0;
 	ch2 = 0;
 	
 	tr=restoretoken(board, a, b);
 	board[a][b]= 'X';
 	display(board, bcount, wcount, fplyr, splyr, cplyr);
-	printf("\nCurrent player: %s\n", cplyr);
+	printf("\nCurrent player: %s (%c)\n", cplyr, token);
 	printf("Press a directional key to navigate around the board.\n");
 	printf("Press Enter to place a token.\n");
 	printf("Press ESC to exit.\n");
@@ -615,7 +615,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b] = 'X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
 				}
 
 			}
@@ -632,7 +632,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
 				}
 			}
 			else if (ch2 == 75)/*Left Key*/
@@ -648,7 +648,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
 				}
 			}
 			else if (ch2 == 77)/*Right Key*/
@@ -664,7 +664,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
 				}
 			}
 			else
@@ -695,8 +695,16 @@ again:
 		{	 	 
 			if(board[a][b] == ' ')
 			{
-				fliptoken(board, token, a, b, &flipup);
-				if(flipup>0)
+				ftup(board, token, a, b, &flipup);
+				ftdown(board, token, a, b, &flipdown);
+				ftleft(board, token, a, b, &flipleft);
+				ftright(board, token, a, b, &flipright);
+				ftul(board, token, a, b, &flipul);
+				ftur(board, token, a, b, &flipur);
+				ftdl(board, token, a, b, &flipdl);
+				ftdr(board, token, a, b, &flipdr);
+				
+				if(flipup>0 || flipdown>0 || flipleft>0 || flipright>0 || flipul>0 || flipur >0 || flipdl>0 || flipdr>0)
 				{
 					board[a][b] = token;
 				}
@@ -747,7 +755,7 @@ main()
 	char fplyr[10], splyr[10], cplyr[10];
 	char token = ' ', yn = ' ';
 	int board[ROW][COLUMN];
-	int x, y, a, b, bcount, wcount, total;
+	int x, y, a, b, bcount, wcount, total=0;
 	int ch1,ch2;
 	
 	printf("********************** Welcome to Black & White Chess!!! **********************\n");
@@ -764,7 +772,7 @@ main()
 		printf("Place down your tokens with the enter key.\n");
 		printf("Opponent tokens between your tokens will be flipped into your tokens.\n");
 		printf("Tokens can be flipped horizontally, vertically or diagonally.\n");
-		printf("Your turn may be skipped if you cannot flip at least of your opponent's token.\n");
+		printf("Your turn may be skipped if you cannot flip at least one of your opponent's token.\n");
 		printf("The player with the most tokens at the end of the game wins.\n\n");
 	}
 	else if(yn=='N' || yn=='n')
@@ -793,8 +801,7 @@ main()
 	initialize(board);
 	
 	do{
-	
-		if(total < 64)
+		if(total<64)
 		{
 			/*First Player*/
 			token = '@';
@@ -803,14 +810,16 @@ main()
 			{
 				cplyr[a] = fplyr[a];
 			}
-	
+			
 			calctoken(board, &bcount,&wcount, &total);
-		
+			
 			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr);
-	
+				
 		}
 		
-		if(total < 64)
+		calctoken(board, &bcount,&wcount, &total);
+		
+		if(total<64)
 		{
 			/*Second Player*/
 			token = 'O';
@@ -823,14 +832,23 @@ main()
 			calctoken(board, &bcount, &wcount, &total);
 	
 			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr);
-	
 		}
+		
+		calctoken(board, &bcount,&wcount, &total);
+		
 	}while(total<64);
 	
 	/*Display Final Board*/
 	display(board, bcount, wcount, fplyr, splyr, cplyr);
 	
-	printf("End");
+	if(bcount > wcount)
+	{
+		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (@) with %i tokens!", fplyr, bcount);
+	}
+	else
+	{
+		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (O) with %i tokens!", splyr, wcount);
+	}
 	
 	return 0;
 }
