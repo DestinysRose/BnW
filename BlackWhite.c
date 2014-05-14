@@ -1,7 +1,6 @@
 /* File: BlackWhite.c
 * Date started: 21/04/2014
-* Last Modified: 15/05/2014
-*/
+* Last Modified: 15/05/2014*/
 
 #include <stdio.h>
 #include <string.h>
