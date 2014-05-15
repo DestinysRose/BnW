@@ -1,6 +1,7 @@
 /* File: BlackWhite.c
 * Date started: 21/04/2014
-* Last Modified: 15/05/2014*/
+* Last Modified: 15/05/2014
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +10,35 @@
 #define ROW 8
 #define COLUMN 8
 
+/*Highscore Structure*/
+ typedef struct 
+ {
+ 	char *n1, *n2, *n3, *n4, *n5, *p1, *p2, *p3, *p4, *p5;
+ 	int t1, t2, t3, t4, t5;
+ }highscore; 
+
+/*Read Highscores & Check for records (If no existing records, it will create the file)*/
+int read(highscore top5)
+{
+}
+
+/*Highscore Prototype*/
+int write(highscore top5);
+void calc(highscore top5);
+ 
+/*Display Title & Scoreboard*/
+void disphead(highscore top5)
+{
+	
+	printf("********************** Welcome to Black & White Chess!!! **********************\n");
+	printf("\nPrevious High Scores:\n");
+	printf("________________________\n");
+	printf("%2s %10s   | %2i\n", top5.n1, top5.p1, top5.t1);
+	printf("%2s %10s   | %2i\n", top5.n2, top5.p2, top5.t2);
+	printf("%2s %10s   | %2i\n", top5.n3, top5.p3, top5.t3);
+	printf("%2s %10s   | %2i\n", top5.n4, top5.p4, top5.t4);
+	printf("%2s %10s   | %2i\n", top5.n5, top5.p5, top5.t5);
+}
 
 /*Creates the initial board*/
 void initialize(int board[ROW][COLUMN])
@@ -18,7 +48,7 @@ void initialize(int board[ROW][COLUMN])
 	{
 		for (y =0; y < COLUMN; y++)
 		{
-			board[x][y] = '@';
+			board[x][y] = ' ';
 		}
 	}
 	board[3][3] = '@';
@@ -28,9 +58,13 @@ void initialize(int board[ROW][COLUMN])
 }
 
 /*Displays the current board*/
-void display(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10])
+void display(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10], highscore top5)
 {
 	int x, y;
+	
+	system("cls");
+	disphead(top5);
+	
 	printf("\nCurrent score:");
 	printf("\n%s (@): %2i          %s (O): %2i\n", fplyr, bcount, splyr, wcount);
 
@@ -46,9 +80,12 @@ void display(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], cha
 }
 
 /*Shows where the player is currently selecting*/
-void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10], char token)
+void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char splyr[10], char cplyr[10], char token, highscore top5)
 {
 	int x, y;
+	system("cls");
+	disphead(top5);
+	
 	printf("\nCurrent score:");
 	printf("\n%s (@): %2i          %s (O): %2i\n", fplyr, bcount, splyr, wcount);
 			
@@ -64,7 +101,7 @@ void move(int board[ROW][COLUMN], int bcount, int wcount, char fplyr[10], char s
 	printf("\nCurrent player: %s (%c)\n", cplyr, token);
 	printf("Press a directional key to navigate around the board.\n");
 	printf("Press Enter to place a token.\n");
-	printf("Press ESC to exit.\n");
+	printf("Press ESC to exit.");
 }
 
 /*Check for token type to restore*/
@@ -564,7 +601,7 @@ void calctoken(int board[ROW][COLUMN], int *bcount, int *wcount, int *total)
 
 /*Allows player to navigate through the board using the arrow keys*/
 
-void navigation(int board[ROW][COLUMN], int ch1, int ch2, char token,int bcount, int wcount, int total, char fplyr[10], char splyr[10], char cplyr[10])
+void navigation(int board[ROW][COLUMN], int ch1, int ch2, char token,int bcount, int wcount, int total, char fplyr[10], char splyr[10], char cplyr[10], highscore top5)
 {
 	int a=7, b=7, tr, flipup, flipdown, flipleft, flipright, flipul, flipur, flipdl, flipdr, yn;
 	ch1 = 0;
@@ -572,11 +609,11 @@ void navigation(int board[ROW][COLUMN], int ch1, int ch2, char token,int bcount,
 	
 	tr=restoretoken(board, a, b);
 	board[a][b]= 'X';
-	display(board, bcount, wcount, fplyr, splyr, cplyr);
+	display(board, bcount, wcount, fplyr, splyr, cplyr, top5);
 	printf("\nCurrent player: %s (%c)\n", cplyr, token);
 	printf("Press a directional key to navigate around the board.\n");
 	printf("Press Enter to place a token.\n");
-	printf("Press ESC to exit.\n");
+	printf("Press ESC to exit.");
 
 	if(tr > 0)
 		{
@@ -614,7 +651,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b] = 'X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token, top5);
 				}
 
 			}
@@ -631,7 +668,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token, top5);
 				}
 			}
 			else if (ch2 == 75)/*Left Key*/
@@ -647,7 +684,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token, top5);
 				}
 			}
 			else if (ch2 == 77)/*Right Key*/
@@ -663,7 +700,7 @@ again:
 				{
 					tr=restoretoken(board, a, b);
 					board[a][b]='X';
-					move(board, bcount, wcount, fplyr, splyr, cplyr, token);
+					move(board, bcount, wcount, fplyr, splyr, cplyr, token, top5);
 				}
 			}
 			else
@@ -687,7 +724,6 @@ again:
 		} 
 		else if(ch1 == 27)/*ESC key*/
 		{
-			printf("Ok, bye.");
 			exit(0);
 		}
 		else if(ch1 == 13) /*Enter Key*/
@@ -749,7 +785,7 @@ again:
 
 
 /*Main function*/
-main()
+main(void)
 {
 	char fplyr[10], splyr[10], cplyr[10];
 	char token = ' ', yn = ' ';
@@ -757,8 +793,26 @@ main()
 	int x, y, a, b, bcount, wcount, total=0;
 	int ch1,ch2;
 	
-	printf("********************** Welcome to Black & White Chess!!! **********************\n");
+	highscore top5;
 	
+	top5.n1 = "1)";
+	top5.n2 = "2)";
+	top5.n3 = "3)";
+	top5.n4 = "4)";
+	top5.n5 = "5)";
+	top5.p1 = "-";
+	top5.p2 = "-";
+	top5.p3 = "-";
+	top5.p4 = "-";
+	top5.p5 = "-";
+	top5.t1 = 0;
+	top5.t2 = 0;
+	top5.t3 = 0;
+	top5.t4 = 0;
+	top5.t5 = 0;
+	
+	disphead(top5);
+
 	Tut:
 	
 		printf("Would you like to know how to play?(Y/N)\n\n");
@@ -783,7 +837,7 @@ main()
 		goto Tut;
 	}
 	
-	
+	Restart:
 	
 	printf("Please enter first player name:\n");
 	scanf("%s",&fplyr);
@@ -800,6 +854,8 @@ main()
 	initialize(board);
 	
 	do{
+		calctoken(board, &bcount,&wcount, &total);
+		
 		if(total<64)
 		{
 			/*First Player*/
@@ -810,9 +866,7 @@ main()
 				cplyr[a] = fplyr[a];
 			}
 			
-			calctoken(board, &bcount,&wcount, &total);
-			
-			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr);
+			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr, top5);
 				
 		}
 		
@@ -828,9 +882,7 @@ main()
 				cplyr[a] = splyr[a];
 			}	
 	
-			calctoken(board, &bcount, &wcount, &total);
-	
-			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr);
+			navigation(board, ch1, ch2, token, bcount, wcount, total, fplyr, splyr, cplyr, top5);
 		}
 		
 		calctoken(board, &bcount,&wcount, &total);
@@ -838,17 +890,39 @@ main()
 	}while(total<64);
 	
 	/*Display Final Board*/
-	display(board, bcount, wcount, fplyr, splyr, cplyr);
+	display(board, bcount, wcount, fplyr, splyr, cplyr, top5);
 	
 	if(bcount > wcount)
 	{
-		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (@) with %i tokens!", fplyr, bcount);
+		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (@) with %i tokens!\n", fplyr, bcount);
 	}
 	else
 	{
-		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (O) with %i tokens!", splyr, wcount);
+		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (O) with %i tokens!\n", splyr, wcount);
 	}
 	
-	return 0;
+	End:
+	fflush(stdin);
+	printf("Would you like to restart? (Y/N) Press 'N' to exit.\n\n");
+	yn = getch();
+	
+	if(yn=='Y' || yn=='y')
+	{
+		goto Restart;
+	}
+	else if(yn=='N' || yn=='n')
+	{
+		return 0;
+	}
+	else
+	{
+		printf("Invalid key, please press 'Y' or 'N'.\n");
+		goto End;
+	}
+}
+
+/*Record new highscore*/
+int write(highscore top5)
+{
 }
 
