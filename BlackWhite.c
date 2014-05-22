@@ -1,4 +1,5 @@
-/* Date started: 21/04/2014
+/* File: BlackWhite.c
+* Date started: 21/04/2014
 * Last Modified: 20/05/2014
 */
 
@@ -50,7 +51,7 @@ int disphead()
 	}
 	else
 	{
-		sprintf(previous, "-\t\t\t|00\n-\t\t\t|00\n-\t\t\t|00\n-\t\t\t|00\n-\t\t\t|00\n");
+		sprintf(previous, "-\t\t\t| 00\n-\t\t\t| 00\n-\t\t\t| 00\n-\t\t\t| 00\n-\t\t\t| 00\n");
 		fprintf(record, previous);
 		printf("%s", previous);	
 	}
@@ -69,12 +70,12 @@ void initialize(int board[ROW][COLUMN])
 	{
 		for (y =0; y < COLUMN; y++)
 		{
-			board[x][y] = '@';
+			board[x][y] = ' ';
 		}
 	}
 	board[3][3] = '@';
 	board[3][4] = 'O';
-	board[4][3] = ' ';
+	board[4][3] = 'O';
 	board[4][4] = '@';
 }
 
@@ -745,6 +746,8 @@ again:
 		} 
 		else if(ch1 == 27)/*ESC key*/
 		{
+			printf("Ok, bye!\n");
+			getchar();
 			exit(0);
 		}
 		else if(ch1 == 13) /*Enter Key*/
@@ -901,15 +904,19 @@ int main(void)
 		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (%c) with %i tokens!\n", p1.name, p1.token, bcount);
 		strcpy(wplyr, p1.name);
 		ttlcount = bcount;
+		write(wplyr, ttlcount, win);
 	}
-	else
+	else if(wcount > bcount)
 	{
 		printf("\nThe game has ended!\n\nCongratulations! The winner is %s, (%c) with %i tokens!\n", p2.name, p2.token, wcount);
 		strcpy(wplyr, p2.name);
 		ttlcount = wcount;
-	  }
-	
-	write(wplyr, ttlcount, win);
+		write(wplyr, ttlcount, win);
+	}
+	else
+	{
+		printf("\nThe game has ended!\n\nUnfortunately, there is no winner it's a tie!\n");
+	}
 	
 	End:
 	fflush(stdin);
@@ -935,7 +942,7 @@ int main(void)
 int write(char wplyr[6], int ttlcount, struct highscore win[5])
 {
 	FILE *record;
-	char line[7];
+	char line[6];
 	char newscore[120];
 	char *string[5];
 	int x=0;
@@ -946,24 +953,14 @@ int write(char wplyr[6], int ttlcount, struct highscore win[5])
 	while (!feof(record))
 	{
 	
-		// Allocate memory for each of the lines
-		char *line = malloc(7);
+		/*Allocate memory for each of the lines*/
+		char *line = malloc(7 * sizeof(char));
 		
-		// Assign every line into string array
-		if (fgets(line, 7 , record))
-		{
-			string[i] = line;
-		}
-		i++;
+		/*Assign every line into string array*/
+		fscanf(record, "%s %c %i", win[x].plyr, &win[x].divider, &win[x].tokens);
+		x++;
 	}
 	
-	for (x=0;x<5;x++)
-	{
-		strcpy(win[x].plyr, string[y]);
-		y++;
-		win[x].tokens = atoi(string[y]);
-		y++;	
-	}
 	
 	fclose(record);
 	
@@ -984,16 +981,22 @@ int write(char wplyr[6], int ttlcount, struct highscore win[5])
 	
 	record = fopen("record.txt", "w+");
 	
-	fprintf(record, "%s", win[0].plyr);
+	fprintf(record, "%s\t\t\t", win[0].plyr);
+	fprintf(record, "%c", win[0].divider);
 	fprintf(record, "%i\n", win[0].tokens);
-	fprintf(record, "%s", win[1].plyr);
+	fprintf(record, "%s\t\t\t", win[1].plyr);
+	fprintf(record, "%c", win[1].divider);
 	fprintf(record, "%i\n", win[1].tokens);
-	fprintf(record, "%s", win[2].plyr);
+	fprintf(record, "%s\t\t\t", win[2].plyr);
+	fprintf(record, "%c", win[2].divider);
 	fprintf(record, "%i\n", win[2].tokens);
-	fprintf(record, "%s", win[3].plyr);
+	fprintf(record, "%s\t\t\t", win[3].plyr);
+	fprintf(record, "%c", win[3].divider);
 	fprintf(record, "%i\n", win[3].tokens);
-	fprintf(record, "%s\t\t\t|", win[4].plyr);
-	fprintf(record, "%i", win[4].tokens);	         
-	fclose(record);	   
+	fprintf(record, "%s\t\t\t", win[4].plyr);
+	fprintf(record, "%c", win[4].divider);
+	fprintf(record, "%i", win[4].tokens);
+	         
+	fclose(record);
 }
 
